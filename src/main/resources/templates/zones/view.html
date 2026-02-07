@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Zone Details</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a th:href="@{/zones}" class="text-muted text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i>Back to Zones
+            </a>
+            <h4 class="mb-0 mt-2" th:text="${zone.zoneName}">Zone Name</h4>
+        </div>
+        <div>
+            <a th:href="@{/zones/{id}/edit(id=${zone.zoneId})}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-2"></i>Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Zone Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Zone Code</label>
+                            <p class="mb-0"><code th:text="${zone.zoneCode} ?: '--'">CODE</code></p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Status</label>
+                            <p class="mb-0">
+                                <span class="badge" th:classappend="${zone.isActive} ? 'status-active' : 'status-inactive'"
+                                      th:text="${zone.isActive} ? 'Active' : 'Inactive'">Active</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Difficulty Rating</label>
+                            <p class="mb-0" th:class="'difficulty-' + ${zone.difficultyRating}">
+                                <i class="bi bi-star-fill" th:each="i : ${#numbers.sequence(1, zone.difficultyRating)}"></i>
+                                <span th:text="' (' + ${zone.difficultyRating} + '/5)'"></span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Road Condition</label>
+                            <p class="mb-0">
+                                <span class="badge" th:classappend="'road-' + ${zone.roadCondition}"
+                                      th:text="${zone.roadCondition}">good</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Best Delivery Window</label>
+                            <p class="mb-0" th:text="${zone.bestDeliveryWindow} ?: '--'">Morning</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Avg. Delivery Time</label>
+                            <p class="mb-0" th:text="${zone.avgDeliveryTimeMins} ? ${zone.avgDeliveryTimeMins} + ' minutes' : '--'">15 minutes</p>
+                        </div>
+                        <div class="col-12 mb-3" th:if="${zone.centerLat != null and zone.centerLng != null}">
+                            <label class="text-muted small">Center Coordinates</label>
+                            <p class="mb-0">
+                                <span th:text="${zone.centerLat} + ', ' + ${zone.centerLng}">0.0, 0.0</span>
+                                <button class="btn btn-sm btn-link copy-coordinates"
+                                        th:data-lat="${zone.centerLat}" th:data-lng="${zone.centerLng}">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </p>
+                        </div>
+                        <div class="col-12" th:if="${zone.notes}">
+                            <label class="text-muted small">Notes</label>
+                            <p class="mb-0" th:text="${zone.notes}">Zone notes...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Landmarks -->
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Landmarks in this Zone</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(landmarks)}" class="text-center text-muted py-4">
+                        <i class="bi bi-signpost-split d-block mb-2" style="font-size: 2rem;"></i>
+                        <p class="mb-0">No landmarks registered in this zone</p>
+                    </div>
+                    <div th:unless="${#lists.isEmpty(landmarks)}" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Landmark</th>
+                                    <th>Type</th>
+                                    <th>Reliability</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="landmark : ${landmarks}">
+                                    <td>
+                                        <i class="bi bi-geo me-2"></i>
+                                        <span th:text="${landmark.landmarkName}">Landmark</span>
+                                    </td>
+                                    <td th:text="${landmark.landmarkType}">Type</td>
+                                    <td>
+                                        <span th:class="'difficulty-' + ${landmark.reliabilityScore}">
+                                            <i class="bi bi-star-fill" th:each="i : ${#numbers.sequence(1, landmark.reliabilityScore)}"></i>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Map Preview</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="map-container d-flex align-items-center justify-content-center">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-map d-block mb-2" style="font-size: 3rem;"></i>
+                            <p class="mb-0">Map integration available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

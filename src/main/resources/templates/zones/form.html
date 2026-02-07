@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Zone Form</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0" th:text="${zone.zoneId} ? 'Edit Zone' : 'New Zone'">Zone Form</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/zones/save}" th:object="${zone}" method="post">
+                        <input type="hidden" th:field="*{zoneId}">
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="zoneName" class="form-label">Zone Name *</label>
+                                <input type="text" class="form-control" id="zoneName" th:field="*{zoneName}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="zoneCode" class="form-label">Zone Code</label>
+                                <input type="text" class="form-control" id="zoneCode" th:field="*{zoneCode}"
+                                       placeholder="e.g., ZN-001">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="parentZone" class="form-label">Parent Zone</label>
+                                <select class="form-select" id="parentZone" th:field="*{parentZone}">
+                                    <option value="">-- None --</option>
+                                    <option th:each="pz : ${parentZones}"
+                                            th:value="${pz.zoneId}"
+                                            th:text="${pz.zoneName}">Parent Zone</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bestDeliveryWindow" class="form-label">Best Delivery Window</label>
+                                <select class="form-select" id="bestDeliveryWindow" th:field="*{bestDeliveryWindow}">
+                                    <option value="">-- Select --</option>
+                                    <option value="morning">Morning (6AM - 12PM)</option>
+                                    <option value="afternoon">Afternoon (12PM - 5PM)</option>
+                                    <option value="evening">Evening (5PM - 9PM)</option>
+                                    <option value="any">Any Time</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="centerLat" class="form-label">Center Latitude</label>
+                                <input type="number" step="0.000001" class="form-control" id="centerLat"
+                                       th:field="*{centerLat}" placeholder="-1.2921">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="centerLng" class="form-label">Center Longitude</label>
+                                <input type="number" step="0.000001" class="form-control" id="centerLng"
+                                       th:field="*{centerLng}" placeholder="36.8219">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="difficultyRating" class="form-label">Difficulty Rating</label>
+                                <select class="form-select" id="difficultyRating" th:field="*{difficultyRating}">
+                                    <option value="1">1 - Very Easy</option>
+                                    <option value="2">2 - Easy</option>
+                                    <option value="3">3 - Moderate</option>
+                                    <option value="4">4 - Difficult</option>
+                                    <option value="5">5 - Very Difficult</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="roadCondition" class="form-label">Road Condition</label>
+                                <select class="form-select" id="roadCondition" th:field="*{roadCondition}">
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                    <option value="seasonal">Seasonal</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="avgDeliveryTimeMins" class="form-label">Avg. Delivery Time (min)</label>
+                                <input type="number" class="form-control" id="avgDeliveryTimeMins"
+                                       th:field="*{avgDeliveryTimeMins}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" th:field="*{notes}" rows="3"
+                                      placeholder="Special instructions, landmarks, access information..."></textarea>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isActive" th:field="*{isActive}">
+                            <label class="form-check-label" for="isActive">Active</label>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Save Zone
+                            </button>
+                            <a th:href="@{/zones}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

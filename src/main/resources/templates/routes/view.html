@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Route Details</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a th:href="@{/routes}" class="text-muted text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i>Back to Routes
+            </a>
+            <h4 class="mb-0 mt-2">
+                Route for <span th:text="${#temporals.format(route.routeDate, 'MMMM d, yyyy')}">Date</span>
+                <span class="badge badge-status ms-2" th:classappend="'status-' + ${route.status}"
+                      th:text="${route.status}">planned</span>
+            </h4>
+        </div>
+        <div class="d-flex gap-2">
+            <form th:if="${route.status == 'planned'}"
+                  th:action="@{/routes/{id}/start(id=${route.routeId})}" method="post">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-play-fill me-2"></i>Start Route
+                </button>
+            </form>
+            <form th:if="${route.status == 'in_progress'}"
+                  th:action="@{/routes/{id}/complete(id=${route.routeId})}" method="post">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-lg me-2"></i>Complete Route
+                </button>
+            </form>
+            <a th:if="${route.status == 'planned'}"
+               th:href="@{/routes/{id}/edit(id=${route.routeId})}" class="btn btn-outline-secondary">
+                <i class="bi bi-pencil me-2"></i>Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Route Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small">Driver</label>
+                        <p class="mb-0">
+                            <a th:if="${route.driver}"
+                               th:href="@{/drivers/{id}(id=${route.driver.driverId})}" class="text-decoration-none">
+                                <i class="bi bi-person-badge me-2"></i>
+                                <span th:text="${route.driver.fullName}">Driver</span>
+                            </a>
+                            <span th:unless="${route.driver}" class="text-muted">Unassigned</span>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Total Stops</label>
+                        <p class="mb-0 fs-4 fw-semibold" th:text="${route.totalStops}">0</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="text-muted small">Distance</label>
+                            <p class="mb-0">
+                                <span th:if="${route.totalDistanceKm}"
+                                      th:text="${route.totalDistanceKm} + ' km'">-- km</span>
+                                <span th:unless="${route.totalDistanceKm}" class="text-muted">--</span>
+                            </p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="text-muted small">Duration</label>
+                            <p class="mb-0">
+                                <span th:if="${route.actualDurationMins}"
+                                      th:text="${route.actualDurationMins} + ' min'">-- min</span>
+                                <span th:elseif="${route.estimatedDurationMins}"
+                                      th:text="'~' + ${route.estimatedDurationMins} + ' min'" class="text-muted">-- min</span>
+                                <span th:unless="${route.actualDurationMins or route.estimatedDurationMins}" class="text-muted">--</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div th:if="${route.startedAt}" class="mb-3">
+                        <label class="text-muted small">Started At</label>
+                        <p class="mb-0" th:text="${#temporals.format(route.startedAt, 'HH:mm')}">--:--</p>
+                    </div>
+                    <div th:if="${route.completedAt}" class="mb-0">
+                        <label class="text-muted small">Completed At</label>
+                        <p class="mb-0" th:text="${#temporals.format(route.completedAt, 'HH:mm')}">--:--</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Route Map</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="map-container d-flex align-items-center justify-content-center">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-map d-block mb-2" style="font-size: 3rem;"></i>
+                            <p class="mb-0">Map view</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Delivery Stops</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(stops)}" class="text-center text-muted py-4">
+                        <i class="bi bi-geo-alt d-block mb-2" style="font-size: 2rem;"></i>
+                        <p class="mb-0">No stops in this route</p>
+                    </div>
+
+                    <div th:unless="${#lists.isEmpty(stops)}" class="route-timeline">
+                        <div th:each="stop, iterStat : ${stops}" class="route-stop" th:classappend="${stop.status}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="badge bg-secondary me-2" th:text="${stop.sequenceNumber}">1</span>
+                                    <strong>
+                                        <a th:href="@{/orders/{id}(id=${stop.order.orderId})}" class="text-decoration-none"
+                                           th:text="${stop.order.orderNumber}">ORD-001</a>
+                                    </strong>
+                                    <span class="text-muted ms-2" th:text="${stop.order.customer.fullName}">Customer</span>
+                                </div>
+                                <span class="badge badge-status" th:classappend="'status-' + ${stop.status}"
+                                      th:text="${stop.status}">pending</span>
+                            </div>
+
+                            <div class="mt-2 ps-4">
+                                <p class="small mb-1" th:if="${stop.order.deliveryLocation}">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    <span th:text="${stop.order.deliveryLocation.locationDescription} ?: (stop.order.deliveryLocation.latitude + ', ' + stop.order.deliveryLocation.longitude)">Location</span>
+                                </p>
+                                <p class="small text-muted mb-2" th:if="${stop.plannedArrival}">
+                                    <i class="bi bi-clock me-1"></i>
+                                    Planned: <span th:text="${stop.plannedArrival}">--:--</span>
+                                    <span th:if="${stop.actualArrival}">
+                                        | Actual: <span th:text="${#temporals.format(stop.actualArrival, 'HH:mm')}">--:--</span>
+                                    </span>
+                                </p>
+
+                                <div th:if="${stop.status == 'pending' and route.status == 'in_progress'}" class="mt-2">
+                                    <form th:action="@{/routes/stops/{id}/status(id=${stop.stopId})}" method="post" class="d-inline">
+                                        <input type="hidden" name="routeId" th:value="${route.routeId}">
+                                        <input type="hidden" name="status" value="delivered">
+                                        <button type="submit" class="btn btn-sm btn-success me-1">
+                                            <i class="bi bi-check"></i> Delivered
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                            th:data-bs-target="'#failModal' + ${stop.stopId}">
+                                        <i class="bi bi-x"></i> Failed
+                                    </button>
+                                </div>
+
+                                <p th:if="${stop.failureReason}" class="small text-danger mt-2 mb-0">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    <span th:text="${stop.failureReason}">Reason</span>
+                                </p>
+                                <p th:if="${stop.driverNotes}" class="small text-muted mt-1 mb-0">
+                                    <i class="bi bi-chat-left-text me-1"></i>
+                                    <span th:text="${stop.driverNotes}">Notes</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Failure Modals -->
+    <div th:each="stop : ${stops}" th:if="${stop.status == 'pending'}">
+        <div class="modal fade" th:id="'failModal' + ${stop.stopId}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/routes/stops/{id}/status(id=${stop.stopId})}" method="post">
+                        <input type="hidden" name="routeId" th:value="${route.routeId}">
+                        <input type="hidden" name="status" value="failed">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Mark Delivery as Failed</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Failure Reason</label>
+                                <select name="failureReason" class="form-select" required>
+                                    <option value="">-- Select Reason --</option>
+                                    <option value="not_home">Customer not home</option>
+                                    <option value="wrong_location">Wrong location</option>
+                                    <option value="inaccessible">Location inaccessible</option>
+                                    <option value="refused">Customer refused</option>
+                                    <option value="damaged">Package damaged</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Mark as Failed</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

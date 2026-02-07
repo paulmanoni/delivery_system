@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Customer Form</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0" th:text="${customer.customerId} ? 'Edit Customer' : 'New Customer'">Customer Form</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/customers/save}" th:object="${customer}" method="post">
+                        <input type="hidden" th:field="*{customerId}">
+
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="phonePrimary" class="form-label">Primary Phone *</label>
+                                <input type="tel" class="form-control" id="phonePrimary" th:field="*{phonePrimary}"
+                                       placeholder="+254712345678" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phoneSecondary" class="form-label">Secondary Phone</label>
+                                <input type="tel" class="form-control" id="phoneSecondary" th:field="*{phoneSecondary}"
+                                       placeholder="+254712345678">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="preferredLanguage" class="form-label">Preferred Language</label>
+                            <select class="form-select" id="preferredLanguage" th:field="*{preferredLanguage}">
+                                <option value="en">English</option>
+                                <option value="sw">Swahili</option>
+                                <option value="fr">French</option>
+                                <option value="ar">Arabic</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Save Customer
+                            </button>
+                            <a th:href="@{/customers}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

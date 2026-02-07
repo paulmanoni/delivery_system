@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Order Details</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a th:href="@{/orders}" class="text-muted text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i>Back to Orders
+            </a>
+            <h4 class="mb-0 mt-2">
+                Order <span th:text="${order.orderNumber}">ORD-001</span>
+                <span class="badge badge-status ms-2" th:classappend="'status-' + ${order.status}"
+                      th:text="${order.status}">pending</span>
+            </h4>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="dropdown" th:if="${order.status != 'delivered' and order.status != 'cancelled'}">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Update Status
+                </button>
+                <ul class="dropdown-menu">
+                    <li th:if="${order.status == 'pending'}">
+                        <form th:action="@{/orders/{id}/status(id=${order.orderId})}" method="post">
+                            <input type="hidden" name="status" value="assigned">
+                            <button class="dropdown-item" type="submit">Mark as Assigned</button>
+                        </form>
+                    </li>
+                    <li th:if="${order.status == 'assigned'}">
+                        <form th:action="@{/orders/{id}/status(id=${order.orderId})}" method="post">
+                            <input type="hidden" name="status" value="in_transit">
+                            <button class="dropdown-item" type="submit">Mark as In Transit</button>
+                        </form>
+                    </li>
+                    <li th:if="${order.status == 'in_transit'}">
+                        <form th:action="@{/orders/{id}/status(id=${order.orderId})}" method="post">
+                            <input type="hidden" name="status" value="delivered">
+                            <button class="dropdown-item" type="submit">Mark as Delivered</button>
+                        </form>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/orders/{id}/status(id=${order.orderId})}" method="post">
+                            <input type="hidden" name="status" value="failed">
+                            <button class="dropdown-item text-danger" type="submit">Mark as Failed</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <a th:href="@{/orders/{id}/edit(id=${order.orderId})}" class="btn btn-outline-secondary">
+                <i class="bi bi-pencil me-2"></i>Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Order Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Customer</label>
+                            <p class="mb-0">
+                                <a th:href="@{/customers/{id}(id=${order.customer.customerId})}" class="text-decoration-none">
+                                    <i class="bi bi-person me-2"></i>
+                                    <span th:text="${order.customer.fullName}">Customer</span>
+                                </a>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Phone</label>
+                            <p class="mb-0">
+                                <i class="bi bi-telephone me-2"></i>
+                                <span th:text="${order.customer.phonePrimary}">+254...</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Package Count</label>
+                            <p class="mb-0" th:text="${order.packageCount}">1</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Weight</label>
+                            <p class="mb-0">
+                                <span th:if="${order.totalWeightKg}" th:text="${order.totalWeightKg} + ' kg'">-- kg</span>
+                                <span th:unless="${order.totalWeightKg}" class="text-muted">--</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Package Size</label>
+                            <p class="mb-0" th:text="${order.packageSize} ?: '--'">medium</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Special Handling</label>
+                            <p class="mb-0">
+                                <span th:if="${order.isFragile}" class="badge bg-warning text-dark me-1">Fragile</span>
+                                <span th:if="${order.isPerishable}" class="badge bg-info me-1">Perishable</span>
+                                <span th:if="${!order.isFragile and !order.isPerishable}" class="text-muted">None</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3" th:if="${order.codAmount}">
+                            <label class="text-muted small">COD Amount</label>
+                            <p class="mb-0 fw-semibold text-success" th:text="'KES ' + ${order.codAmount}">KES 0.00</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small">Priority</label>
+                            <p class="mb-0">
+                                <span th:switch="${order.priority}">
+                                    <span th:case="1" class="badge bg-danger">Urgent</span>
+                                    <span th:case="2" class="badge bg-warning text-dark">High</span>
+                                    <span th:case="3" class="badge bg-info">Normal</span>
+                                    <span th:case="*" class="badge bg-secondary">Low</span>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Schedule</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="text-muted small">Order Date</label>
+                            <p class="mb-0" th:text="${#temporals.format(order.orderDate, 'MMM d, yyyy HH:mm')}">Date</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="text-muted small">Requested Date</label>
+                            <p class="mb-0">
+                                <span th:if="${order.requestedDate}"
+                                      th:text="${#temporals.format(order.requestedDate, 'MMM d, yyyy')}">Date</span>
+                                <span th:unless="${order.requestedDate}" class="text-muted">Not specified</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="text-muted small">Time Window</label>
+                            <p class="mb-0">
+                                <span th:if="${order.timeWindowStart and order.timeWindowEnd}"
+                                      th:text="${order.timeWindowStart} + ' - ' + ${order.timeWindowEnd}">08:00 - 17:00</span>
+                                <span th:unless="${order.timeWindowStart and order.timeWindowEnd}" class="text-muted">Any time</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Delivery Location</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${order.deliveryLocation}">
+                        <p class="mb-2">
+                            <strong th:text="${order.deliveryLocation.locationName} ?: 'Location'">Location</strong>
+                        </p>
+                        <p class="small mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>
+                            <span th:text="${order.deliveryLocation.latitude} + ', ' + ${order.deliveryLocation.longitude}">0.0, 0.0</span>
+                        </p>
+                        <p th:if="${order.deliveryLocation.locationDescription}" class="small mb-2"
+                           th:text="${order.deliveryLocation.locationDescription}">Description</p>
+                        <p th:if="${order.deliveryLocation.directionsFromLandmark}" class="small text-muted mb-0">
+                            <i class="bi bi-signpost me-1"></i>
+                            <span th:text="${order.deliveryLocation.directionsFromLandmark}">Directions</span>
+                        </p>
+                    </div>
+                    <div class="map-container mt-3 d-flex align-items-center justify-content-center">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-map d-block mb-2" style="font-size: 2rem;"></i>
+                            <small>Map view</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

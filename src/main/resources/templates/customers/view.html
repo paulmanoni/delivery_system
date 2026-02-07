@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Customer Details</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a th:href="@{/customers}" class="text-muted text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i>Back to Customers
+            </a>
+            <h4 class="mb-0 mt-2" th:text="${customer.fullName}">Customer Name</h4>
+        </div>
+        <div>
+            <a th:href="@{/customers/{id}/edit(id=${customer.customerId})}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-2"></i>Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small">Primary Phone</label>
+                        <p class="mb-0">
+                            <i class="bi bi-telephone me-2"></i>
+                            <span th:text="${customer.phonePrimary}">+254...</span>
+                        </p>
+                    </div>
+                    <div class="mb-3" th:if="${customer.phoneSecondary}">
+                        <label class="text-muted small">Secondary Phone</label>
+                        <p class="mb-0">
+                            <i class="bi bi-telephone me-2"></i>
+                            <span th:text="${customer.phoneSecondary}">+254...</span>
+                        </p>
+                    </div>
+                    <div class="mb-0">
+                        <label class="text-muted small">Preferred Language</label>
+                        <p class="mb-0">
+                            <span class="badge bg-secondary" th:text="${customer.preferredLanguage}">en</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Delivery Locations</h5>
+                    <a th:href="@{/customers/{id}/locations/new(id=${customer.customerId})}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Add Location
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(locations)}" class="text-center text-muted py-4">
+                        <i class="bi bi-geo-alt d-block mb-2" style="font-size: 2rem;"></i>
+                        <p class="mb-2">No delivery locations registered</p>
+                        <a th:href="@{/customers/{id}/locations/new(id=${customer.customerId})}" class="btn btn-primary btn-sm">
+                            Add First Location
+                        </a>
+                    </div>
+                    <div th:unless="${#lists.isEmpty(locations)}">
+                        <div th:each="location : ${locations}" class="border rounded p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <i class="bi bi-geo-alt me-2"></i>
+                                        <span th:text="${location.locationName} ?: 'Unnamed Location'">Location</span>
+                                        <span th:if="${location.isDefault}" class="badge bg-primary ms-2">Default</span>
+                                    </h6>
+                                    <p class="text-muted small mb-2">
+                                        <span th:text="${location.latitude} + ', ' + ${location.longitude}">0.0, 0.0</span>
+                                        <button class="btn btn-link btn-sm p-0 ms-2 copy-coordinates"
+                                                th:data-lat="${location.latitude}" th:data-lng="${location.longitude}">
+                                            <i class="bi bi-clipboard small"></i>
+                                        </button>
+                                    </p>
+                                    <p th:if="${location.locationDescription}" class="mb-1 small"
+                                       th:text="${location.locationDescription}">Description</p>
+                                    <p th:if="${location.directionsFromLandmark}" class="mb-0 small text-muted">
+                                        <i class="bi bi-signpost me-1"></i>
+                                        <span th:text="${location.directionsFromLandmark}">Directions</span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <span class="badge"
+                                          th:classappend="'verification-' + ${location.verificationStatus}"
+                                          th:text="${location.verificationStatus}">unverified</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

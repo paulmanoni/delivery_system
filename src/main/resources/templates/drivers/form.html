@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Driver Form</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0" th:text="${driver.driverId} ? 'Edit Driver' : 'New Driver'">Driver Form</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/drivers/save}" th:object="${driver}" method="post">
+                        <input type="hidden" th:field="*{driverId}">
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="fullName" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="phone" class="form-label">Phone *</label>
+                                <input type="tel" class="form-control" id="phone" th:field="*{phone}"
+                                       placeholder="+254712345678" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="licenseNumber" class="form-label">License Number</label>
+                                <input type="text" class="form-control" id="licenseNumber" th:field="*{licenseNumber}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="vehicleType" class="form-label">Vehicle Type</label>
+                                <select class="form-select" id="vehicleType" th:field="*{vehicleType}">
+                                    <option value="">-- Select --</option>
+                                    <option value="bicycle">Bicycle</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                    <option value="van">Van</option>
+                                    <option value="truck">Truck</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="homeZone" class="form-label">Home Zone</label>
+                                <select class="form-select" id="homeZone" th:field="*{homeZone}">
+                                    <option value="">-- Select --</option>
+                                    <option th:each="z : ${zones}"
+                                            th:value="${z.zoneId}"
+                                            th:text="${z.zoneName}">Zone</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3" id="capacityFields">
+                            <div class="col-md-6">
+                                <label for="maxCapacityKg" class="form-label">Max Capacity (kg)</label>
+                                <input type="number" step="0.01" class="form-control" id="maxCapacityKg"
+                                       th:field="*{maxCapacityKg}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="maxPackages" class="form-label">Max Packages</label>
+                                <input type="number" class="form-control" id="maxPackages" th:field="*{maxPackages}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isActive" th:field="*{isActive}">
+                            <label class="form-check-label" for="isActive">Active</label>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Save Driver
+                            </button>
+                            <a th:href="@{/drivers}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

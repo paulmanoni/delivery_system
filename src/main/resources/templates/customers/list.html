@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Customers</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Customers</h4>
+        <a th:href="@{/customers/new}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Add Customer
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(customers)}" class="empty-state">
+                <i class="bi bi-people"></i>
+                <p>No customers found</p>
+                <a th:href="@{/customers/new}" class="btn btn-primary">Add First Customer</a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(customers)}" class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Primary Phone</th>
+                            <th>Secondary Phone</th>
+                            <th>Language</th>
+                            <th>Locations</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="customer : ${customers}">
+                            <td>
+                                <a th:href="@{/customers/{id}(id=${customer.customerId})}" class="fw-semibold text-decoration-none">
+                                    <i class="bi bi-person me-2"></i>
+                                    <span th:text="${customer.fullName}">Customer Name</span>
+                                </a>
+                            </td>
+                            <td>
+                                <i class="bi bi-telephone me-1 text-muted"></i>
+                                <span th:text="${customer.phonePrimary}">+254...</span>
+                            </td>
+                            <td>
+                                <span th:if="${customer.phoneSecondary}" th:text="${customer.phoneSecondary}">+254...</span>
+                                <span th:unless="${customer.phoneSecondary}" class="text-muted">--</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary" th:text="${customer.preferredLanguage}">en</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info" th:text="${#lists.size(customer.locations)}">0</span>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{/customers/{id}(id=${customer.customerId})}" class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a th:href="@{/customers/{id}/edit(id=${customer.customerId})}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{/customers/{id}/delete(id=${customer.customerId})}" method="post" class="d-inline"
+                                      data-confirm="Are you sure you want to delete this customer?">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

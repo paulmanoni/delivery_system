@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Orders</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Orders</h4>
+        <a th:href="@{/orders/new}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>New Order
+        </a>
+    </div>
+
+    <!-- Status Filters -->
+    <div class="mb-4">
+        <div class="btn-group" role="group">
+            <a th:href="@{/orders}" class="btn btn-outline-secondary"
+               th:classappend="${currentStatus == null} ? 'active' : ''">All</a>
+            <a th:href="@{/orders(status='pending')}" class="btn btn-outline-warning"
+               th:classappend="${currentStatus == 'pending'} ? 'active' : ''">Pending</a>
+            <a th:href="@{/orders(status='assigned')}" class="btn btn-outline-info"
+               th:classappend="${currentStatus == 'assigned'} ? 'active' : ''">Assigned</a>
+            <a th:href="@{/orders(status='in_transit')}" class="btn btn-outline-primary"
+               th:classappend="${currentStatus == 'in_transit'} ? 'active' : ''">In Transit</a>
+            <a th:href="@{/orders(status='delivered')}" class="btn btn-outline-success"
+               th:classappend="${currentStatus == 'delivered'} ? 'active' : ''">Delivered</a>
+            <a th:href="@{/orders(status='failed')}" class="btn btn-outline-danger"
+               th:classappend="${currentStatus == 'failed'} ? 'active' : ''">Failed</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(orders)}" class="empty-state">
+                <i class="bi bi-box-seam"></i>
+                <p>No orders found</p>
+                <a th:href="@{/orders/new}" class="btn btn-primary">Create First Order</a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(orders)}" class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Packages</th>
+                            <th>Priority</th>
+                            <th>Requested Date</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}">
+                            <td>
+                                <a th:href="@{/orders/{id}(id=${order.orderId})}" class="fw-semibold text-decoration-none">
+                                    <span th:text="${order.orderNumber}">ORD-001</span>
+                                </a>
+                            </td>
+                            <td>
+                                <span th:text="${order.customer.fullName}">Customer</span>
+                            </td>
+                            <td>
+                                <span th:text="${order.packageCount}">1</span>
+                                <span th:if="${order.isFragile}" class="badge bg-warning text-dark ms-1">Fragile</span>
+                                <span th:if="${order.isPerishable}" class="badge bg-info ms-1">Perishable</span>
+                            </td>
+                            <td>
+                                <span th:switch="${order.priority}">
+                                    <span th:case="1" class="badge bg-danger">Urgent</span>
+                                    <span th:case="2" class="badge bg-warning text-dark">High</span>
+                                    <span th:case="3" class="badge bg-info">Normal</span>
+                                    <span th:case="4" class="badge bg-secondary">Low</span>
+                                    <span th:case="*" class="badge bg-secondary">Normal</span>
+                                </span>
+                            </td>
+                            <td>
+                                <span th:if="${order.requestedDate}"
+                                      th:text="${#temporals.format(order.requestedDate, 'MMM d, yyyy')}">Date</span>
+                                <span th:unless="${order.requestedDate}" class="text-muted">--</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-status" th:classappend="'status-' + ${order.status}"
+                                      th:text="${order.status}">pending</span>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{/orders/{id}(id=${order.orderId})}" class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a th:href="@{/orders/{id}/edit(id=${order.orderId})}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

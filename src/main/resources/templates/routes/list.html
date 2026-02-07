@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Delivery Routes</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Delivery Routes</h4>
+        <a th:href="@{/routes/new}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Plan New Route
+        </a>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card mb-4">
+        <div class="card-body py-2">
+            <form class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label for="date" class="col-form-label">Filter by Date:</label>
+                </div>
+                <div class="col-auto">
+                    <input type="date" class="form-control" id="date" name="date"
+                           th:value="${selectedDate}">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-primary">Filter</button>
+                    <a th:href="@{/routes}" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(routes)}" class="empty-state">
+                <i class="bi bi-signpost-2"></i>
+                <p>No routes found</p>
+                <a th:href="@{/routes/new}" class="btn btn-primary">Plan First Route</a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(routes)}" class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Driver</th>
+                            <th>Stops</th>
+                            <th>Distance</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="route : ${routes}">
+                            <td>
+                                <a th:href="@{/routes/{id}(id=${route.routeId})}" class="fw-semibold text-decoration-none">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    <span th:text="${#temporals.format(route.routeDate, 'MMM d, yyyy')}">Date</span>
+                                </a>
+                            </td>
+                            <td>
+                                <span th:if="${route.driver}" th:text="${route.driver.fullName}">Driver</span>
+                                <span th:unless="${route.driver}" class="text-muted">Unassigned</span>
+                            </td>
+                            <td th:text="${route.totalStops}">0</td>
+                            <td>
+                                <span th:if="${route.totalDistanceKm}"
+                                      th:text="${route.totalDistanceKm} + ' km'">-- km</span>
+                                <span th:unless="${route.totalDistanceKm}" class="text-muted">--</span>
+                            </td>
+                            <td>
+                                <span th:if="${route.actualDurationMins}"
+                                      th:text="${route.actualDurationMins} + ' min'">-- min</span>
+                                <span th:elseif="${route.estimatedDurationMins}"
+                                      th:text="'~' + ${route.estimatedDurationMins} + ' min'" class="text-muted">-- min</span>
+                                <span th:unless="${route.actualDurationMins or route.estimatedDurationMins}" class="text-muted">--</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-status" th:classappend="'status-' + ${route.status}"
+                                      th:text="${route.status}">planned</span>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{/routes/{id}(id=${route.routeId})}" class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <form th:if="${route.status == 'planned'}"
+                                      th:action="@{/routes/{id}/start(id=${route.routeId})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Start Route">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                </form>
+                                <form th:if="${route.status == 'in_progress'}"
+                                      th:action="@{/routes/{id}/complete(id=${route.routeId})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Complete Route">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

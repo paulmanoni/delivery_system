@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Route Form</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0" th:text="${route.routeId} ? 'Edit Route' : 'Plan New Route'">Route Form</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/routes/save}" th:object="${route}" method="post">
+                        <input type="hidden" th:field="*{routeId}">
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="driver" class="form-label">Driver *</label>
+                                <select class="form-select" id="driver" th:field="*{driver}" required>
+                                    <option value="">-- Select Driver --</option>
+                                    <option th:each="d : ${drivers}"
+                                            th:value="${d.driverId}"
+                                            th:text="${d.fullName} + ' (' + ${d.vehicleType} + ')'">Driver</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="routeDate" class="form-label">Route Date *</label>
+                                <input type="date" class="form-control" id="routeDate" th:field="*{routeDate}" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label for="estimatedDurationMins" class="form-label">Estimated Duration (min)</label>
+                                <input type="number" class="form-control" id="estimatedDurationMins"
+                                       th:field="*{estimatedDurationMins}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="totalDistanceKm" class="form-label">Total Distance (km)</label>
+                                <input type="number" step="0.01" class="form-control" id="totalDistanceKm"
+                                       th:field="*{totalDistanceKm}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="algorithmVersion" class="form-label">Algorithm Version</label>
+                                <input type="text" class="form-control" id="algorithmVersion"
+                                       th:field="*{algorithmVersion}" placeholder="v1.0">
+                            </div>
+                        </div>
+
+                        <div class="mb-4" th:if="${pendingOrders != null and !#lists.isEmpty(pendingOrders)}">
+                            <h6 class="text-muted mb-3">Available Orders</h6>
+                            <div class="table-responsive border rounded">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 40px;">
+                                                <input type="checkbox" class="form-check-input" id="selectAll">
+                                            </th>
+                                            <th>Order #</th>
+                                            <th>Customer</th>
+                                            <th>Zone</th>
+                                            <th>Priority</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="order : ${pendingOrders}">
+                                            <td>
+                                                <input type="checkbox" class="form-check-input order-checkbox"
+                                                       name="selectedOrders" th:value="${order.orderId}">
+                                            </td>
+                                            <td th:text="${order.orderNumber}">ORD-001</td>
+                                            <td th:text="${order.customer.fullName}">Customer</td>
+                                            <td>
+                                                <span th:if="${order.deliveryLocation?.zone}"
+                                                      th:text="${order.deliveryLocation.zone.zoneName}">Zone</span>
+                                                <span th:unless="${order.deliveryLocation?.zone}" class="text-muted">--</span>
+                                            </td>
+                                            <td>
+                                                <span th:switch="${order.priority}">
+                                                    <span th:case="1" class="badge bg-danger">Urgent</span>
+                                                    <span th:case="2" class="badge bg-warning text-dark">High</span>
+                                                    <span th:case="*" class="badge bg-secondary">Normal</span>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Save Route
+                            </button>
+                            <a th:href="@{/routes}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block layout:fragment="scripts">
+<script>
+    document.getElementById('selectAll')?.addEventListener('change', function() {
+        document.querySelectorAll('.order-checkbox').forEach(cb => cb.checked = this.checked);
+    });
+</script>
+</th:block>
+</body>
+</html>

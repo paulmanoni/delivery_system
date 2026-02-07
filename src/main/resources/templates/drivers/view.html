@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Driver Details</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a th:href="@{/drivers}" class="text-muted text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i>Back to Drivers
+            </a>
+            <h4 class="mb-0 mt-2" th:text="${driver.fullName}">Driver Name</h4>
+        </div>
+        <div>
+            <a th:href="@{/drivers/{id}/edit(id=${driver.driverId})}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-2"></i>Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Driver Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-person-badge text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="mt-3 mb-1" th:text="${driver.fullName}">Name</h5>
+                        <span class="badge" th:classappend="${driver.isActive} ? 'status-active' : 'status-inactive'"
+                              th:text="${driver.isActive} ? 'Active' : 'Inactive'">Active</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-muted small">Phone</label>
+                        <p class="mb-0">
+                            <i class="bi bi-telephone me-2"></i>
+                            <span th:text="${driver.phone}">+254...</span>
+                        </p>
+                    </div>
+                    <div class="mb-3" th:if="${driver.licenseNumber}">
+                        <label class="text-muted small">License Number</label>
+                        <p class="mb-0">
+                            <i class="bi bi-card-text me-2"></i>
+                            <span th:text="${driver.licenseNumber}">LICENSE</span>
+                        </p>
+                    </div>
+                    <div class="mb-3" th:if="${driver.vehicleType}">
+                        <label class="text-muted small">Vehicle Type</label>
+                        <p class="mb-0">
+                            <span th:switch="${driver.vehicleType}">
+                                <i th:case="'motorcycle'" class="bi bi-scooter me-2"></i>
+                                <i th:case="'bicycle'" class="bi bi-bicycle me-2"></i>
+                                <i th:case="*" class="bi bi-truck me-2"></i>
+                            </span>
+                            <span th:text="${driver.vehicleType}">Vehicle</span>
+                        </p>
+                    </div>
+                    <div class="mb-0">
+                        <label class="text-muted small">Rating</label>
+                        <p class="mb-0">
+                            <span class="rating-stars"><i class="bi bi-star-fill"></i></span>
+                            <span th:text="${driver.rating}">5.00</span>
+                            <span class="text-muted" th:text="'(' + ${driver.totalDeliveries} + ' deliveries)'"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Routes</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(routes)}" class="text-center text-muted py-4">
+                        <i class="bi bi-signpost-2 d-block mb-2" style="font-size: 2rem;"></i>
+                        <p class="mb-0">No routes assigned yet</p>
+                    </div>
+                    <div th:unless="${#lists.isEmpty(routes)}" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Stops</th>
+                                    <th>Status</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="route : ${routes}">
+                                    <td>
+                                        <a th:href="@{/routes/{id}(id=${route.routeId})}" class="text-decoration-none">
+                                            <span th:text="${#temporals.format(route.routeDate, 'MMM d, yyyy')}">Date</span>
+                                        </a>
+                                    </td>
+                                    <td th:text="${route.totalStops}">0</td>
+                                    <td>
+                                        <span class="badge badge-status" th:classappend="'status-' + ${route.status}"
+                                              th:text="${route.status}">Status</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${route.actualDurationMins}"
+                                              th:text="${route.actualDurationMins} + ' min'">-- min</span>
+                                        <span th:unless="${route.actualDurationMins}" class="text-muted">--</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

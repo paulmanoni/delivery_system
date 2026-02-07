@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Drivers</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Drivers</h4>
+        <a th:href="@{/drivers/new}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Add Driver
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(drivers)}" class="empty-state">
+                <i class="bi bi-person-badge"></i>
+                <p>No drivers found</p>
+                <a th:href="@{/drivers/new}" class="btn btn-primary">Add First Driver</a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(drivers)}" class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Driver</th>
+                            <th>Phone</th>
+                            <th>Vehicle</th>
+                            <th>Rating</th>
+                            <th>Deliveries</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="driver : ${drivers}">
+                            <td>
+                                <a th:href="@{/drivers/{id}(id=${driver.driverId})}" class="fw-semibold text-decoration-none">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    <span th:text="${driver.fullName}">Driver Name</span>
+                                </a>
+                            </td>
+                            <td>
+                                <i class="bi bi-telephone me-1 text-muted"></i>
+                                <span th:text="${driver.phone}">+254...</span>
+                            </td>
+                            <td>
+                                <span th:switch="${driver.vehicleType}">
+                                    <i th:case="'motorcycle'" class="bi bi-scooter me-1"></i>
+                                    <i th:case="'bicycle'" class="bi bi-bicycle me-1"></i>
+                                    <i th:case="'van'" class="bi bi-truck me-1"></i>
+                                    <i th:case="'truck'" class="bi bi-truck me-1"></i>
+                                    <i th:case="*" class="bi bi-truck me-1"></i>
+                                </span>
+                                <span th:text="${driver.vehicleType}">Vehicle</span>
+                            </td>
+                            <td>
+                                <span class="rating-stars">
+                                    <i class="bi bi-star-fill"></i>
+                                </span>
+                                <span th:text="${driver.rating}">5.00</span>
+                            </td>
+                            <td th:text="${driver.totalDeliveries}">0</td>
+                            <td>
+                                <span class="badge" th:classappend="${driver.isActive} ? 'status-active' : 'status-inactive'"
+                                      th:text="${driver.isActive} ? 'Active' : 'Inactive'">Active</span>
+                            </td>
+                            <td class="text-end">
+                                <a th:href="@{/drivers/{id}(id=${driver.driverId})}" class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a th:href="@{/drivers/{id}/edit(id=${driver.driverId})}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{/drivers/{id}/toggle(id=${driver.driverId})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning"
+                                            th:title="${driver.isActive} ? 'Deactivate' : 'Activate'">
+                                        <i class="bi" th:classappend="${driver.isActive} ? 'bi-pause' : 'bi-play'"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
