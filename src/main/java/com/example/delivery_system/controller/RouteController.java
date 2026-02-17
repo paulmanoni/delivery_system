@@ -70,10 +70,12 @@ public class RouteController {
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute DeliveryRoute route, RedirectAttributes redirectAttributes) {
-        routeService.save(route);
+    public String save(@ModelAttribute DeliveryRoute route,
+                       @RequestParam(required = false) java.util.List<UUID> selectedOrders,
+                       RedirectAttributes redirectAttributes) {
+        DeliveryRoute saved = routeService.saveWithStops(route, selectedOrders);
         redirectAttributes.addFlashAttribute("success", "Route saved successfully");
-        return "redirect:/routes";
+        return "redirect:/routes/" + saved.getRouteId();
     }
 
     @PostMapping("/{id}/start")

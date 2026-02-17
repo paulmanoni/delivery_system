@@ -1,8 +1,10 @@
 package com.example.delivery_system.service;
 
 import com.example.delivery_system.entity.DeliveryRoute;
+import com.example.delivery_system.entity.Order;
 import com.example.delivery_system.entity.RouteStop;
 import com.example.delivery_system.repository.DeliveryRouteRepository;
+import com.example.delivery_system.repository.OrderRepository;
 import com.example.delivery_system.repository.RouteStopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class RouteService {
 
     private final DeliveryRouteRepository routeRepository;
     private final RouteStopRepository stopRepository;
+    private final OrderRepository orderRepository;
 
     public List<DeliveryRoute> findAll() {
         return routeRepository.findAll();
@@ -48,6 +51,34 @@ public class RouteService {
 
     public DeliveryRoute save(DeliveryRoute route) {
         return routeRepository.save(route);
+    }
+
+    public DeliveryRoute saveWithStops(DeliveryRoute route, List<UUID> orderIds) {
+        DeliveryRoute saved = routeRepository.save(route);
+        if (orderIds != null && !orderIds.isEmpty()) {
+            int seq = 1;
+            for (UUID orderId : orderIds) {
+                Order order = orderRepository.findById(orderId).orElse(null);
+                if (order != null) {
+                    RouteStop stop = RouteStop.builder()
+                            .route(saved)
+                            .order(order)
+                            .sequenceNumber(seq++)
+                            .status("pending")
+                            .build();
+                    if (order.getDeliveryLocation() != null) {
+                        stop.setDeliveryLat(order.getDeliveryLocation().getLatitude());
+                        stop.setDeliveryLng(order.getDeliveryLocation().getLongitude());
+                    }
+                    stopRepository.save(stop);
+                    order.setStatus("assigned");
+                    orderRepository.save(order);
+                }
+            }
+            saved.setTotalStops(seq - 1);
+            routeRepository.save(saved);
+        }
+        return saved;
     }
 
     public void startRoute(UUID routeId) {

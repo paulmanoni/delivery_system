@@ -24,14 +24,14 @@
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="card">
-                <div class="card-header bg-white">
+                <div class="card-header">
                     <h5 class="mb-0">Driver Information</h5>
                 </div>
                 <div class="card-body">
                     <div class="text-center mb-4">
-                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
-                             style="width: 80px; height: 80px;">
-                            <i class="bi bi-person-badge text-primary" style="font-size: 2rem;"></i>
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--blue-100), var(--blue-200));">
+                            <i class="bi bi-person-badge" style="font-size: 2rem; color: var(--blue-600);"></i>
                         </div>
                         <h5 class="mt-3 mb-1" th:text="${driver.fullName}">Name</h5>
                         <span class="badge" th:classappend="${driver.isActive} ? 'status-active' : 'status-inactive'"
@@ -77,7 +77,7 @@
 
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header bg-white">
+                <div class="card-header">
                     <h5 class="mb-0">Recent Routes</h5>
                 </div>
                 <div class="card-body">

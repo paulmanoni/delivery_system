@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layouts/main}">
 <head>
     <title>Delivery Zones</title>
@@ -9,7 +10,7 @@
 <main layout:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">Delivery Zones</h4>
-        <a th:href="@{/zones/new}" class="btn btn-primary">
+        <a sec:authorize="hasAnyRole('ADMIN','DISPATCHER')" th:href="@{/zones/new}" class="btn btn-primary">
             <i class="bi bi-plus-circle me-2"></i>Add Zone
         </a>
     </div>
@@ -19,7 +20,7 @@
             <div th:if="${#lists.isEmpty(zones)}" class="empty-state">
                 <i class="bi bi-geo-alt"></i>
                 <p>No delivery zones found</p>
-                <a th:href="@{/zones/new}" class="btn btn-primary">Add First Zone</a>
+                <a sec:authorize="hasAnyRole('ADMIN','DISPATCHER')" th:href="@{/zones/new}" class="btn btn-primary">Add First Zone</a>
             </div>
 
             <div th:unless="${#lists.isEmpty(zones)}" class="table-responsive">
@@ -64,21 +65,23 @@
                                       th:text="${zone.isActive} ? 'Active' : 'Inactive'">Active</span>
                             </td>
                             <td class="text-end">
-                                <a th:href="@{/zones/{id}/edit(id=${zone.zoneId})}" class="btn btn-sm btn-outline-secondary" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form th:action="@{/zones/{id}/toggle(id=${zone.zoneId})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-outline-warning"
-                                            th:title="${zone.isActive} ? 'Deactivate' : 'Activate'">
-                                        <i class="bi" th:classappend="${zone.isActive} ? 'bi-pause' : 'bi-play'"></i>
-                                    </button>
-                                </form>
-                                <form th:action="@{/zones/{id}/delete(id=${zone.zoneId})}" method="post" class="d-inline"
-                                      data-confirm="Are you sure you want to delete this zone?">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                <span sec:authorize="hasAnyRole('ADMIN','DISPATCHER')">
+                                    <a th:href="@{/zones/{id}/edit(id=${zone.zoneId})}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form th:action="@{/zones/{id}/toggle(id=${zone.zoneId})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary"
+                                                th:title="${zone.isActive} ? 'Deactivate' : 'Activate'">
+                                            <i class="bi" th:classappend="${zone.isActive} ? 'bi-pause' : 'bi-play'"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/zones/{id}/delete(id=${zone.zoneId})}" method="post" class="d-inline"
+                                          data-confirm="Are you sure you want to delete this zone?">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </span>
                             </td>
                         </tr>
                     </tbody>

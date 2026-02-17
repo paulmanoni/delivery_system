@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layouts/main}">
 <head>
     <title>Drivers</title>
@@ -9,7 +10,7 @@
 <main layout:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">Drivers</h4>
-        <a th:href="@{/drivers/new}" class="btn btn-primary">
+        <a sec:authorize="hasAnyRole('ADMIN','DISPATCHER')" th:href="@{/drivers/new}" class="btn btn-primary">
             <i class="bi bi-plus-circle me-2"></i>Add Driver
         </a>
     </div>
@@ -19,7 +20,7 @@
             <div th:if="${#lists.isEmpty(drivers)}" class="empty-state">
                 <i class="bi bi-person-badge"></i>
                 <p>No drivers found</p>
-                <a th:href="@{/drivers/new}" class="btn btn-primary">Add First Driver</a>
+                <a sec:authorize="hasAnyRole('ADMIN','DISPATCHER')" th:href="@{/drivers/new}" class="btn btn-primary">Add First Driver</a>
             </div>
 
             <div th:unless="${#lists.isEmpty(drivers)}" class="table-responsive">
@@ -72,15 +73,17 @@
                                 <a th:href="@{/drivers/{id}(id=${driver.driverId})}" class="btn btn-sm btn-outline-primary" title="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a th:href="@{/drivers/{id}/edit(id=${driver.driverId})}" class="btn btn-sm btn-outline-secondary" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form th:action="@{/drivers/{id}/toggle(id=${driver.driverId})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-outline-warning"
-                                            th:title="${driver.isActive} ? 'Deactivate' : 'Activate'">
-                                        <i class="bi" th:classappend="${driver.isActive} ? 'bi-pause' : 'bi-play'"></i>
-                                    </button>
-                                </form>
+                                <span sec:authorize="hasAnyRole('ADMIN','DISPATCHER')">
+                                    <a th:href="@{/drivers/{id}/edit(id=${driver.driverId})}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form th:action="@{/drivers/{id}/toggle(id=${driver.driverId})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary"
+                                                th:title="${driver.isActive} ? 'Deactivate' : 'Activate'">
+                                            <i class="bi" th:classappend="${driver.isActive} ? 'bi-pause' : 'bi-play'"></i>
+                                        </button>
+                                    </form>
+                                </span>
                             </td>
                         </tr>
                     </tbody>

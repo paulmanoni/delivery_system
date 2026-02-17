@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layouts/main}">
 <head>
     <title>Delivery Routes</title>
@@ -9,7 +10,7 @@
 <main layout:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">Delivery Routes</h4>
-        <a th:href="@{/routes/new}" class="btn btn-primary">
+        <a sec:authorize="hasAnyRole('ADMIN','DISPATCHER')" th:href="@{/routes/new}" class="btn btn-primary">
             <i class="bi bi-plus-circle me-2"></i>Plan New Route
         </a>
     </div>
@@ -38,7 +39,7 @@
             <div th:if="${#lists.isEmpty(routes)}" class="empty-state">
                 <i class="bi bi-signpost-2"></i>
                 <p>No routes found</p>
-                <a th:href="@{/routes/new}" class="btn btn-primary">Plan First Route</a>
+                <a sec:authorize="hasAnyRole('ADMIN','DISPATCHER')" th:href="@{/routes/new}" class="btn btn-primary">Plan First Route</a>
             </div>
 
             <div th:unless="${#lists.isEmpty(routes)}" class="table-responsive">
@@ -77,7 +78,7 @@
                                       th:text="${route.actualDurationMins} + ' min'">-- min</span>
                                 <span th:elseif="${route.estimatedDurationMins}"
                                       th:text="'~' + ${route.estimatedDurationMins} + ' min'" class="text-muted">-- min</span>
-                                <span th:unless="${route.actualDurationMins or route.estimatedDurationMins}" class="text-muted">--</span>
+                                <span th:unless="${route.actualDurationMins != null or route.estimatedDurationMins != null}" class="text-muted">--</span>
                             </td>
                             <td>
                                 <span class="badge badge-status" th:classappend="'status-' + ${route.status}"
@@ -87,18 +88,20 @@
                                 <a th:href="@{/routes/{id}(id=${route.routeId})}" class="btn btn-sm btn-outline-primary" title="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <form th:if="${route.status == 'planned'}"
-                                      th:action="@{/routes/{id}/start(id=${route.routeId})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Start Route">
-                                        <i class="bi bi-play-fill"></i>
-                                    </button>
-                                </form>
-                                <form th:if="${route.status == 'in_progress'}"
-                                      th:action="@{/routes/{id}/complete(id=${route.routeId})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Complete Route">
-                                        <i class="bi bi-check-lg"></i>
-                                    </button>
-                                </form>
+                                <span sec:authorize="hasAnyRole('ADMIN','DISPATCHER')">
+                                    <form th:if="${route.status == 'planned'}"
+                                          th:action="@{/routes/{id}/start(id=${route.routeId})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-primary" title="Start Route">
+                                            <i class="bi bi-play-fill"></i>
+                                        </button>
+                                    </form>
+                                    <form th:if="${route.status == 'in_progress'}"
+                                          th:action="@{/routes/{id}/complete(id=${route.routeId})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-primary" title="Complete Route">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                </span>
                             </td>
                         </tr>
                     </tbody>

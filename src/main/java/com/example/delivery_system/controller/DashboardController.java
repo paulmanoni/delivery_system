@@ -14,7 +14,7 @@ public class DashboardController {
 
     @GetMapping("/")
     public String index() {
-        return "redirect:/dashboard";
+        return "redirect:/landing";
     }
 
     @GetMapping("/dashboard")

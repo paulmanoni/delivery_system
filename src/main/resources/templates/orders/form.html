@@ -7,17 +7,17 @@
 </head>
 <body>
 <main layout:fragment="content">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
+    <div class="row g-4">
+        <div class="col-lg-7">
             <div class="card">
-                <div class="card-header bg-white">
+                <div class="card-header">
                     <h5 class="mb-0" th:text="${order.orderId} ? 'Edit Order' : 'New Order'">Order Form</h5>
                 </div>
                 <div class="card-body">
                     <form th:action="@{/orders/save}" th:object="${order}" method="post">
                         <input type="hidden" th:field="*{orderId}">
 
-                        <div class="row mb-4">
+                        <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="orderNumber" class="form-label">Order Number</label>
                                 <input type="text" class="form-control" id="orderNumber" th:field="*{orderNumber}"
@@ -33,29 +33,32 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label for="deliveryLocation" class="form-label">Delivery Location *</label>
-                                <select class="form-select" id="deliveryLocation" th:field="*{deliveryLocation}" required>
-                                    <option value="">-- Select customer first --</option>
-                                </select>
+                                <label for="deliveryLocation" class="form-label">Location *</label>
+                                <div class="input-group">
+                                    <select class="form-select" id="deliveryLocation" th:field="*{deliveryLocation}" required>
+                                        <option value="">-- Select customer first --</option>
+                                    </select>
+                                    <a id="addLocationBtn" href="#" class="btn btn-outline-primary d-none" title="Add new location"
+                                       target="_blank"><i class="bi bi-plus-lg"></i></a>
+                                </div>
                             </div>
                         </div>
 
-                        <h6 class="text-muted mb-3">Package Details</h6>
                         <div class="row mb-3">
                             <div class="col-md-3">
-                                <label for="packageCount" class="form-label">Package Count</label>
+                                <label for="packageCount" class="form-label">Packages</label>
                                 <input type="number" class="form-control" id="packageCount" th:field="*{packageCount}"
                                        min="1" value="1">
                             </div>
                             <div class="col-md-3">
-                                <label for="totalWeightKg" class="form-label">Total Weight (kg)</label>
+                                <label for="totalWeightKg" class="form-label">Weight (kg)</label>
                                 <input type="number" step="0.01" class="form-control" id="totalWeightKg"
                                        th:field="*{totalWeightKg}">
                             </div>
                             <div class="col-md-3">
-                                <label for="packageSize" class="form-label">Package Size</label>
+                                <label for="packageSize" class="form-label">Size</label>
                                 <select class="form-select" id="packageSize" th:field="*{packageSize}">
-                                    <option value="">-- Select --</option>
+                                    <option value="">--</option>
                                     <option value="small">Small</option>
                                     <option value="medium">Medium</option>
                                     <option value="large">Large</option>
@@ -63,50 +66,44 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label for="codAmount" class="form-label">COD Amount</label>
+                                <label for="codAmount" class="form-label">Amount (TZS)</label>
                                 <input type="number" step="0.01" class="form-control" id="codAmount"
                                        th:field="*{codAmount}" placeholder="0.00">
                             </div>
                         </div>
 
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="isFragile" th:field="*{isFragile}">
-                                    <label class="form-check-label" for="isFragile">Fragile</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="isPerishable" th:field="*{isPerishable}">
-                                    <label class="form-check-label" for="isPerishable">Perishable</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <h6 class="text-muted mb-3">Delivery Schedule</h6>
                         <div class="row mb-3">
                             <div class="col-md-3">
-                                <label for="requestedDate" class="form-label">Requested Date</label>
+                                <label for="requestedDate" class="form-label">Date</label>
                                 <input type="date" class="form-control" id="requestedDate" th:field="*{requestedDate}">
                             </div>
                             <div class="col-md-3">
-                                <label for="timeWindowStart" class="form-label">Time Window Start</label>
+                                <label for="timeWindowStart" class="form-label">From</label>
                                 <input type="time" class="form-control" id="timeWindowStart" th:field="*{timeWindowStart}">
                             </div>
                             <div class="col-md-3">
-                                <label for="timeWindowEnd" class="form-label">Time Window End</label>
+                                <label for="timeWindowEnd" class="form-label">To</label>
                                 <input type="time" class="form-control" id="timeWindowEnd" th:field="*{timeWindowEnd}">
                             </div>
                             <div class="col-md-3">
                                 <label for="priority" class="form-label">Priority</label>
                                 <select class="form-select" id="priority" th:field="*{priority}">
-                                    <option value="1">1 - Urgent</option>
-                                    <option value="2">2 - High</option>
-                                    <option value="3" selected>3 - Normal</option>
-                                    <option value="4">4 - Low</option>
-                                    <option value="5">5 - Lowest</option>
+                                    <option value="1">Urgent</option>
+                                    <option value="2">High</option>
+                                    <option value="3" selected>Normal</option>
+                                    <option value="4">Low</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="isFragile" th:field="*{isFragile}">
+                                <label class="form-check-label" for="isFragile">Fragile</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="isPerishable" th:field="*{isPerishable}">
+                                <label class="form-check-label" for="isPerishable">Perishable</label>
                             </div>
                         </div>
 
@@ -120,7 +117,126 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-5">
+            <div class="card" style="position: sticky; top: 1rem;">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Delivery Location</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="orderMap" class="map-container map-container-lg"></div>
+                </div>
+                <div class="card-footer small text-muted" id="locationInfo">
+                    <i class="bi bi-info-circle me-1"></i>Select a customer and location to see it on the map
+                </div>
+            </div>
+        </div>
     </div>
 </main>
+
+<th:block layout:fragment="scripts">
+<script th:inline="javascript">
+(function() {
+    // All locations grouped by customer ID — embedded from server as JSON
+    var allLocations = /*[[${allLocationsJson}]]*/ '{}';
+    if (typeof allLocations === 'string') allLocations = JSON.parse(allLocations);
+
+    var currentLocationId = /*[[${order.deliveryLocation?.locationId?.toString()}]]*/ null;
+
+    var customerSelect = document.getElementById('customer');
+    var locationSelect = document.getElementById('deliveryLocation');
+    var locationInfo = document.getElementById('locationInfo');
+    var addLocationBtn = document.getElementById('addLocationBtn');
+
+    // Initialize map centered on Dodoma
+    var map = L.map('orderMap').setView([-6.163, 35.752], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    var marker = null;
+    var currentLocations = [];
+
+    function updateMapMarker() {
+        var selectedId = locationSelect.value;
+        var loc = currentLocations.find(function(l) { return l.id === selectedId; });
+
+        if (marker) {
+            map.removeLayer(marker);
+            marker = null;
+        }
+
+        if (loc) {
+            marker = L.marker([loc.lat, loc.lng]).addTo(map);
+            marker.bindPopup('<strong>' + (loc.name || 'Location') + '</strong>' +
+                (loc.description ? '<br><small>' + loc.description + '</small>' : '')).openPopup();
+            map.setView([loc.lat, loc.lng], 16);
+            locationInfo.innerHTML = '<i class="bi bi-geo-alt me-1"></i><strong>' + (loc.name || 'Location') + '</strong> &mdash; ' +
+                loc.lat.toFixed(4) + ', ' + loc.lng.toFixed(4);
+        } else {
+            map.setView([-6.163, 35.752], 13);
+            locationInfo.innerHTML = '<i class="bi bi-info-circle me-1"></i>Select a customer and location to see it on the map';
+        }
+    }
+
+    function loadLocations(customerId) {
+        currentLocations = allLocations[customerId] || [];
+        locationSelect.innerHTML = '';
+
+        if (currentLocations.length === 0) {
+            locationSelect.innerHTML = '<option value="">-- No locations --</option>';
+            updateMapMarker();
+            return;
+        }
+
+        locationSelect.innerHTML = '<option value="">-- Select Location --</option>';
+        currentLocations.forEach(function(loc) {
+            var opt = document.createElement('option');
+            opt.value = loc.id;
+            var label = loc.name || 'Location';
+            if (loc.description) label += ' (' + loc.description.substring(0, 40) + ')';
+            if (loc.isDefault) label += ' \u2605';
+            opt.textContent = label;
+            if (currentLocationId && loc.id === currentLocationId) opt.selected = true;
+            locationSelect.appendChild(opt);
+        });
+
+        // Auto-select default if no current selection
+        if (!currentLocationId) {
+            var defaultLoc = currentLocations.find(function(l) { return l.isDefault; });
+            if (defaultLoc) {
+                locationSelect.value = defaultLoc.id;
+            }
+        }
+
+        updateMapMarker();
+    }
+
+    customerSelect.addEventListener('change', function() {
+        var customerId = this.value;
+        if (!customerId) {
+            locationSelect.innerHTML = '<option value="">-- Select customer first --</option>';
+            currentLocations = [];
+            addLocationBtn.classList.add('d-none');
+            updateMapMarker();
+            return;
+        }
+        addLocationBtn.href = '/customers/' + customerId + '/locations/new';
+        addLocationBtn.classList.remove('d-none');
+        loadLocations(customerId);
+    });
+
+    locationSelect.addEventListener('change', updateMapMarker);
+
+    // Trigger load if customer is already selected (edit mode)
+    if (customerSelect.value) {
+        addLocationBtn.href = '/customers/' + customerSelect.value + '/locations/new';
+        addLocationBtn.classList.remove('d-none');
+        loadLocations(customerSelect.value);
+    }
+})();
+</script>
+</th:block>
 </body>
 </html>

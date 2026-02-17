@@ -24,7 +24,7 @@
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="card mb-4">
-                <div class="card-header bg-white">
+                <div class="card-header">
                     <h5 class="mb-0">Zone Information</h5>
                 </div>
                 <div class="card-body">
@@ -82,7 +82,7 @@
 
             <!-- Landmarks -->
             <div class="card">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Landmarks in this Zone</h5>
                 </div>
                 <div class="card-body">
@@ -121,20 +121,67 @@
 
         <div class="col-lg-4">
             <div class="card">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">Map Preview</h5>
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-map me-2"></i>Zone Map</h5>
                 </div>
                 <div class="card-body p-0">
-                    <div class="map-container d-flex align-items-center justify-content-center">
-                        <div class="text-center text-muted">
-                            <i class="bi bi-map d-block mb-2" style="font-size: 3rem;"></i>
-                            <p class="mb-0">Map integration available</p>
-                        </div>
-                    </div>
+                    <div id="zoneMap" class="map-container map-container-lg"></div>
                 </div>
             </div>
         </div>
     </div>
 </main>
+
+<th:block layout:fragment="scripts">
+<script th:inline="javascript">
+(function() {
+    var centerLat = /*[[${zone.centerLat}]]*/ null;
+    var centerLng = /*[[${zone.centerLng}]]*/ null;
+    var zoneName = /*[[${zone.zoneName}]]*/ 'Zone';
+
+    if (centerLat == null || centerLng == null) return;
+
+    var map = L.map('zoneMap').setView([centerLat, centerLng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    L.marker([centerLat, centerLng]).addTo(map)
+        .bindPopup('<strong>' + zoneName + '</strong><br><small>Zone Center</small>')
+        .openPopup();
+
+    L.circle([centerLat, centerLng], {
+        color: '#4a6fa5',
+        fillColor: '#4a6fa5',
+        fillOpacity: 0.08,
+        radius: 2000,
+        weight: 2
+    }).addTo(map);
+
+    // Add landmark markers
+    var landmarks = [];
+    /*[# th:each="lm : ${landmarks}"]*/
+    landmarks.push({
+        name: /*[[${lm.landmarkName}]]*/ '',
+        type: /*[[${lm.landmarkType}]]*/ '',
+        lat: /*[[${lm.latitude}]]*/ 0,
+        lng: /*[[${lm.longitude}]]*/ 0
+    });
+    /*[/]*/
+
+    landmarks.forEach(function(lm) {
+        var icon = L.divIcon({
+            className: '',
+            html: '<div style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#829ab1;color:white;font-size:0.7rem;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"><i class="bi bi-geo"></i></div>',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+        });
+        L.marker([lm.lat, lm.lng], {icon: icon}).addTo(map)
+            .bindPopup('<strong>' + lm.name + '</strong><br><small>' + lm.type + '</small>');
+    });
+})();
+</script>
+</th:block>
 </body>
 </html>

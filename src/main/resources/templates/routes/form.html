@@ -7,10 +7,10 @@
 </head>
 <body>
 <main layout:fragment="content">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
+    <div class="row g-4">
+        <div class="col-lg-6">
             <div class="card">
-                <div class="card-header bg-white">
+                <div class="card-header">
                     <h5 class="mb-0" th:text="${route.routeId} ? 'Edit Route' : 'Plan New Route'">Route Form</h5>
                 </div>
                 <div class="card-body">
@@ -35,27 +35,30 @@
 
                         <div class="row mb-4">
                             <div class="col-md-4">
-                                <label for="estimatedDurationMins" class="form-label">Estimated Duration (min)</label>
+                                <label for="estimatedDurationMins" class="form-label">Est. Duration (min)</label>
                                 <input type="number" class="form-control" id="estimatedDurationMins"
                                        th:field="*{estimatedDurationMins}">
                             </div>
                             <div class="col-md-4">
-                                <label for="totalDistanceKm" class="form-label">Total Distance (km)</label>
+                                <label for="totalDistanceKm" class="form-label">Distance (km)</label>
                                 <input type="number" step="0.01" class="form-control" id="totalDistanceKm"
                                        th:field="*{totalDistanceKm}">
                             </div>
                             <div class="col-md-4">
-                                <label for="algorithmVersion" class="form-label">Algorithm Version</label>
+                                <label for="algorithmVersion" class="form-label">Algorithm</label>
                                 <input type="text" class="form-control" id="algorithmVersion"
                                        th:field="*{algorithmVersion}" placeholder="v1.0">
                             </div>
                         </div>
 
                         <div class="mb-4" th:if="${pendingOrders != null and !#lists.isEmpty(pendingOrders)}">
-                            <h6 class="text-muted mb-3">Available Orders</h6>
+                            <h6 class="mb-3" style="color: var(--slate-500);">
+                                <i class="bi bi-box-seam me-1"></i>Available Orders
+                                <span class="badge bg-secondary ms-1" id="selectedCount">0</span> selected
+                            </h6>
                             <div class="table-responsive border rounded">
                                 <table class="table table-hover mb-0">
-                                    <thead class="table-light">
+                                    <thead>
                                         <tr>
                                             <th style="width: 40px;">
                                                 <input type="checkbox" class="form-check-input" id="selectAll">
@@ -67,7 +70,12 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="order : ${pendingOrders}">
+                                        <tr th:each="order : ${pendingOrders}" class="order-row"
+                                            th:data-order-id="${order.orderId}"
+                                            th:data-lat="${order.deliveryLocation?.latitude}"
+                                            th:data-lng="${order.deliveryLocation?.longitude}"
+                                            th:data-customer="${order.customer.fullName}"
+                                            th:data-order-num="${order.orderNumber}">
                                             <td>
                                                 <input type="checkbox" class="form-check-input order-checkbox"
                                                        name="selectedOrders" th:value="${order.orderId}">
@@ -81,9 +89,9 @@
                                             </td>
                                             <td>
                                                 <span th:switch="${order.priority}">
-                                                    <span th:case="1" class="badge bg-danger">Urgent</span>
-                                                    <span th:case="2" class="badge bg-warning text-dark">High</span>
-                                                    <span th:case="*" class="badge bg-secondary">Normal</span>
+                                                    <span th:case="1" class="badge priority-urgent">Urgent</span>
+                                                    <span th:case="2" class="badge priority-high">High</span>
+                                                    <span th:case="*" class="badge priority-normal">Normal</span>
                                                 </span>
                                             </td>
                                         </tr>
@@ -102,14 +110,136 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-6">
+            <div class="card" style="position: sticky; top: 1rem;">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-map me-2"></i>Delivery Locations</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="routePlanMap" class="map-container map-container-lg"></div>
+                </div>
+                <div class="card-footer small text-muted">
+                    <i class="bi bi-info-circle me-1"></i>Check orders in the table to highlight them on the map
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 
 <th:block layout:fragment="scripts">
-<script>
-    document.getElementById('selectAll')?.addEventListener('change', function() {
-        document.querySelectorAll('.order-checkbox').forEach(cb => cb.checked = this.checked);
+<script th:inline="javascript">
+(function() {
+    // Initialize map centered on Dodoma Region
+    var map = L.map('routePlanMap').setView([-6.163, 35.752], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    var markers = {};
+    var selectedGroup = L.layerGroup().addTo(map);
+    var unselectedGroup = L.layerGroup().addTo(map);
+
+    // Collect order location data from table rows
+    var rows = document.querySelectorAll('.order-row');
+    var bounds = [];
+
+    rows.forEach(function(row) {
+        var lat = parseFloat(row.dataset.lat);
+        var lng = parseFloat(row.dataset.lng);
+        var orderId = row.dataset.orderId;
+        var customer = row.dataset.customer;
+        var orderNum = row.dataset.orderNum;
+
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        var grayIcon = L.divIcon({
+            className: '',
+            html: '<div style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#9aa5b4;color:white;font-size:0.7rem;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"><i class="bi bi-box-seam"></i></div>',
+            iconSize: [26, 26],
+            iconAnchor: [13, 13]
+        });
+
+        var blueIcon = L.divIcon({
+            className: '',
+            html: '<div style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#4a6fa5;color:white;font-size:0.75rem;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4);"><i class="bi bi-check-lg"></i></div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        var marker = L.marker([lat, lng], { icon: grayIcon });
+        marker.bindPopup('<strong>' + orderNum + '</strong><br><span style="color:#6b7a8d;">' + customer + '</span>');
+        marker._grayIcon = grayIcon;
+        marker._blueIcon = blueIcon;
+        marker._latlng_data = [lat, lng];
+        unselectedGroup.addLayer(marker);
+
+        markers[orderId] = marker;
+        bounds.push([lat, lng]);
     });
+
+    if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [40, 40] });
+    }
+
+    // Polyline for selected route
+    var routeLine = null;
+
+    function updateMap() {
+        var selectedCoords = [];
+        var count = 0;
+
+        Object.keys(markers).forEach(function(orderId) {
+            var marker = markers[orderId];
+            var checkbox = document.querySelector('.order-row[data-order-id="' + orderId + '"] .order-checkbox');
+            var isChecked = checkbox && checkbox.checked;
+
+            unselectedGroup.removeLayer(marker);
+            selectedGroup.removeLayer(marker);
+
+            if (isChecked) {
+                marker.setIcon(marker._blueIcon);
+                selectedGroup.addLayer(marker);
+                selectedCoords.push(marker._latlng_data);
+                count++;
+            } else {
+                marker.setIcon(marker._grayIcon);
+                unselectedGroup.addLayer(marker);
+            }
+        });
+
+        // Update counter
+        var counter = document.getElementById('selectedCount');
+        if (counter) counter.textContent = count;
+
+        // Draw route line
+        if (routeLine) {
+            map.removeLayer(routeLine);
+            routeLine = null;
+        }
+        if (selectedCoords.length > 1) {
+            routeLine = L.polyline(selectedCoords, {
+                color: '#4a6fa5',
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '8, 6'
+            }).addTo(map);
+        }
+    }
+
+    // Listen for checkbox changes
+    document.querySelectorAll('.order-checkbox').forEach(function(cb) {
+        cb.addEventListener('change', updateMap);
+    });
+
+    document.getElementById('selectAll')?.addEventListener('change', function() {
+        document.querySelectorAll('.order-checkbox').forEach(function(cb) {
+            cb.checked = this.checked;
+        }.bind(this));
+        updateMap();
+    });
+})();
 </script>
 </th:block>
 </body>

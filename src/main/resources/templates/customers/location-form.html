@@ -7,12 +7,13 @@
 </head>
 <body>
 <main layout:fragment="content">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
+    <div class="row g-4">
+        <div class="col-lg-6">
             <div class="card">
-                <div class="card-header bg-white">
+                <div class="card-header">
                     <h5 class="mb-0">
-                        Add Location for <span th:text="${customer.fullName}">Customer</span>
+                        <i class="bi bi-geo-alt me-2"></i>Add Location for
+                        <span th:text="${customer.fullName}">Customer</span>
                     </h5>
                 </div>
                 <div class="card-body">
@@ -20,14 +21,14 @@
                           th:object="${location}" method="post">
                         <input type="hidden" th:field="*{locationId}">
 
-                        <div class="row mb-4">
+                        <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="locationName" class="form-label">Location Name</label>
+                                <label for="locationName" class="form-label">Location Name *</label>
                                 <input type="text" class="form-control" id="locationName" th:field="*{locationName}"
-                                       placeholder="Home, Shop, Office...">
+                                       placeholder="Nyumba, Duka, Ofisi..." required>
                             </div>
                             <div class="col-md-6">
-                                <label for="zone" class="form-label">Delivery Zone</label>
+                                <label for="zone" class="form-label">Zone</label>
                                 <select class="form-select" id="zone" th:field="*{zone}">
                                     <option value="">-- Select Zone --</option>
                                     <option th:each="z : ${zones}"
@@ -37,45 +38,24 @@
                             </div>
                         </div>
 
-                        <h6 class="text-muted mb-3">GPS Coordinates</h6>
-                        <div class="row mb-4">
-                            <div class="col-md-4">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label for="latitude" class="form-label">Latitude *</label>
                                 <input type="number" step="0.000001" class="form-control" id="latitude"
-                                       th:field="*{latitude}" required placeholder="-1.2921">
+                                       th:field="*{latitude}" required placeholder="-6.1630">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label for="longitude" class="form-label">Longitude *</label>
                                 <input type="number" step="0.000001" class="form-control" id="longitude"
-                                       th:field="*{longitude}" required placeholder="36.8219">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="accuracyMeters" class="form-label">Accuracy (meters)</label>
-                                <input type="number" step="0.01" class="form-control" id="accuracyMeters"
-                                       th:field="*{accuracyMeters}">
+                                       th:field="*{longitude}" required placeholder="35.7516">
                             </div>
                         </div>
 
-                        <h6 class="text-muted mb-3">Alternative Location Codes</h6>
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label for="plusCode" class="form-label">Plus Code</label>
-                                <input type="text" class="form-control" id="plusCode" th:field="*{plusCode}"
-                                       placeholder="6GCRMQRG+F9">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="what3words" class="form-label">what3words</label>
-                                <input type="text" class="form-control" id="what3words" th:field="*{what3words}"
-                                       placeholder="///word.word.word">
-                            </div>
-                        </div>
-
-                        <h6 class="text-muted mb-3">Navigation Details</h6>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="nearestLandmark" class="form-label">Nearest Landmark</label>
                                 <select class="form-select" id="nearestLandmark" th:field="*{nearestLandmark}">
-                                    <option value="">-- Select Landmark --</option>
+                                    <option value="">-- Select --</option>
                                     <option th:each="l : ${landmarks}"
                                             th:value="${l.landmarkId}"
                                             th:text="${l.landmarkName}">Landmark</option>
@@ -84,52 +64,44 @@
                             <div class="col-md-6">
                                 <label for="directionsFromLandmark" class="form-label">Directions from Landmark</label>
                                 <input type="text" class="form-control" id="directionsFromLandmark"
-                                       th:field="*{directionsFromLandmark}" placeholder="200m north of...">
+                                       th:field="*{directionsFromLandmark}" placeholder="200m kaskazini ya...">
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="locationDescription" class="form-label">Location Description</label>
+                            <label for="locationDescription" class="form-label">Description</label>
                             <textarea class="form-control" id="locationDescription" th:field="*{locationDescription}"
-                                      rows="2" placeholder="Red gate, mango tree in front, blue roof..."></textarea>
+                                      rows="2" placeholder="Nyumba ya rangi nyekundu, mti wa mwembe mbele..."></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label for="accessNotes" class="form-label">Access Notes</label>
-                            <textarea class="form-control" id="accessNotes" th:field="*{accessNotes}"
-                                      rows="2" placeholder="Call on arrival, gate code 1234..."></textarea>
+                            <input type="text" class="form-control" id="accessNotes" th:field="*{accessNotes}"
+                                   placeholder="Piga simu ukifika, code ya gate 1234...">
                         </div>
 
-                        <h6 class="text-muted mb-3">Delivery Preferences</h6>
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <label for="preferredTimeStart" class="form-label">Preferred Time Start</label>
+                                <label for="preferredTimeStart" class="form-label">Time Start</label>
                                 <input type="time" class="form-control" id="preferredTimeStart"
                                        th:field="*{preferredTimeStart}">
                             </div>
                             <div class="col-md-4">
-                                <label for="preferredTimeEnd" class="form-label">Preferred Time End</label>
+                                <label for="preferredTimeEnd" class="form-label">Time End</label>
                                 <input type="time" class="form-control" id="preferredTimeEnd"
                                        th:field="*{preferredTimeEnd}">
                             </div>
-                            <div class="col-md-4 d-flex align-items-end">
+                            <div class="col-md-4 d-flex align-items-end gap-3">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="parkingAvailable"
                                            th:field="*{parkingAvailable}">
-                                    <label class="form-check-label" for="parkingAvailable">Parking Available</label>
+                                    <label class="form-check-label" for="parkingAvailable">Parking</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="isDefault" th:field="*{isDefault}">
+                                    <label class="form-check-label" for="isDefault">Default</label>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="deliveryInstructions" class="form-label">Delivery Instructions</label>
-                            <textarea class="form-control" id="deliveryInstructions" th:field="*{deliveryInstructions}"
-                                      rows="2" placeholder="Leave with neighbor if not home..."></textarea>
-                        </div>
-
-                        <div class="form-check mb-4">
-                            <input type="checkbox" class="form-check-input" id="isDefault" th:field="*{isDefault}">
-                            <label class="form-check-label" for="isDefault">Set as default location</label>
                         </div>
 
                         <div class="d-flex gap-2">
@@ -142,7 +114,88 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-6">
+            <div class="card" style="position: sticky; top: 1rem;">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-map me-2"></i>Pick Location</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="locationMap" class="map-container map-container-lg"></div>
+                </div>
+                <div class="card-footer small text-muted">
+                    <i class="bi bi-info-circle me-1"></i>Click on the map to set coordinates
+                </div>
+            </div>
+        </div>
     </div>
 </main>
+
+<th:block layout:fragment="scripts">
+<script>
+(function() {
+    var latInput = document.getElementById('latitude');
+    var lngInput = document.getElementById('longitude');
+
+    var initLat = parseFloat(latInput.value) || -6.163;
+    var initLng = parseFloat(lngInput.value) || 35.752;
+    var hasValue = latInput.value && lngInput.value;
+
+    var map = L.map('locationMap').setView([initLat, initLng], hasValue ? 16 : 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    var marker = null;
+    if (hasValue) {
+        marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
+        marker.on('dragend', function() {
+            var pos = marker.getLatLng();
+            latInput.value = pos.lat.toFixed(6);
+            lngInput.value = pos.lng.toFixed(6);
+        });
+    }
+
+    map.on('click', function(e) {
+        latInput.value = e.latlng.lat.toFixed(6);
+        lngInput.value = e.latlng.lng.toFixed(6);
+
+        if (marker) {
+            marker.setLatLng(e.latlng);
+        } else {
+            marker = L.marker(e.latlng, { draggable: true }).addTo(map);
+            marker.on('dragend', function() {
+                var pos = marker.getLatLng();
+                latInput.value = pos.lat.toFixed(6);
+                lngInput.value = pos.lng.toFixed(6);
+            });
+        }
+    });
+
+    // Sync manual input to map
+    function syncFromInputs() {
+        var lat = parseFloat(latInput.value);
+        var lng = parseFloat(lngInput.value);
+        if (isNaN(lat) || isNaN(lng)) return;
+        var latlng = L.latLng(lat, lng);
+        if (marker) {
+            marker.setLatLng(latlng);
+        } else {
+            marker = L.marker(latlng, { draggable: true }).addTo(map);
+            marker.on('dragend', function() {
+                var pos = marker.getLatLng();
+                latInput.value = pos.lat.toFixed(6);
+                lngInput.value = pos.lng.toFixed(6);
+            });
+        }
+        map.setView(latlng, 16);
+    }
+
+    latInput.addEventListener('change', syncFromInputs);
+    lngInput.addEventListener('change', syncFromInputs);
+})();
+</script>
+</th:block>
 </body>
 </html>

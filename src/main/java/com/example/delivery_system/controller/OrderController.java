@@ -1,15 +1,19 @@
 package com.example.delivery_system.controller;
 
+import com.example.delivery_system.entity.Customer;
+import com.example.delivery_system.entity.CustomerLocation;
 import com.example.delivery_system.entity.Order;
 import com.example.delivery_system.service.CustomerService;
 import com.example.delivery_system.service.OrderService;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/orders")
@@ -37,6 +41,7 @@ public class OrderController {
         order.setOrderNumber(orderService.generateOrderNumber());
         model.addAttribute("order", order);
         model.addAttribute("customers", customerService.findAll());
+        addLocationData(model);
         model.addAttribute("pageTitle", "New Order");
         return "orders/form";
     }
@@ -58,6 +63,7 @@ public class OrderController {
                 .map(order -> {
                     model.addAttribute("order", order);
                     model.addAttribute("customers", customerService.findAll());
+                    addLocationData(model);
                     model.addAttribute("pageTitle", "Edit Order");
                     return "orders/form";
                 })
@@ -84,5 +90,30 @@ public class OrderController {
         orderService.delete(id);
         redirectAttributes.addFlashAttribute("success", "Order deleted successfully");
         return "redirect:/orders";
+    }
+
+    private void addLocationData(Model model) {
+        List<Customer> customers = customerService.findAll();
+        Map<String, List<Map<String, Object>>> locationMap = new LinkedHashMap<>();
+        for (Customer c : customers) {
+            List<Map<String, Object>> locs = customerService.findLocationsByCustomer(c.getCustomerId()).stream()
+                    .map(loc -> {
+                        Map<String, Object> m = new LinkedHashMap<>();
+                        m.put("id", loc.getLocationId().toString());
+                        m.put("name", loc.getLocationName());
+                        m.put("description", loc.getLocationDescription());
+                        m.put("lat", loc.getLatitude());
+                        m.put("lng", loc.getLongitude());
+                        m.put("isDefault", Boolean.TRUE.equals(loc.getIsDefault()));
+                        return m;
+                    })
+                    .collect(Collectors.toList());
+            locationMap.put(c.getCustomerId().toString(), locs);
+        }
+        try {
+            model.addAttribute("allLocationsJson", new ObjectMapper().writeValueAsString(locationMap));
+        } catch (Exception e) {
+            model.addAttribute("allLocationsJson", "{}");
+        }
     }
 }
